@@ -22,7 +22,7 @@ mkdir -p "$traj_dir"
 # Loop over protein counts
 for nprots in $(seq $n_min 10 $n_max); do
     echo "Generating input file for nprots=$nprots"
-    ./lammps_init.sh $nsites $sep $nprots "$traj_dir"
+    ./lammps_init.sh $nsites $sep $nprots "$traj_dir" 1  # Start run at 1
     
     # Determine the generated directory name (assuming consistent naming format)
     sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_*/ 2>/dev/null | head -n 1)
@@ -31,7 +31,8 @@ for nprots in $(seq $n_min 10 $n_max); do
         exit 1
     fi
     
-    for run in $(seq 1 $n_runs); do
+    run=1  # Initialize run counter
+    for (( i=0; i<n_runs; i++ )); do
         echo "Running simulation for nprots=$nprots, run=$run"
         
         run_script="${sim_dir}/run_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.sh"
@@ -45,6 +46,8 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         # Move trajectory files to the designated directory
         mv "$sim_dir"/*.lammpstrj "$traj_dir/"
+        
+        ((run++))  # Increment run number
     done
 
 done
