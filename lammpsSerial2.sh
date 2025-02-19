@@ -22,13 +22,14 @@ mkdir -p "$traj_dir"
 # Loop over protein counts
 for nprots in $(seq $n_min 10 $n_max); do
     run=1  # Initialize run counter
+    runProt=1 # Initialise the run counter for in file
     echo "Generating input file for nprots=$nprots"
     
     # Call lammps_init.sh to generate input files for each configuration
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
     
     # Determine the generated directory name (assuming consistent naming format)
-    sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_*/ 2>/dev/null | head -n 1)
+    sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/ 2>/dev/null | head -n 1)
     if [[ -z "$sim_dir" ]]; then
         echo "Error: Simulation directory for nprots=$nprots was not found!"
         exit 1
@@ -62,7 +63,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         ((run++))  # Increment run number
     done
-
+((runProt++)
 done
 
 echo "All simulations completed. Trajectory files saved in $traj_dir."
