@@ -63,7 +63,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         ((run++))  # Increment run number
     done
-((runProt++)
+((runProt++))
 done
 
 echo "All simulations completed. Trajectory files saved in $traj_dir."
