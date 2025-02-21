@@ -25,7 +25,7 @@ out_dir=$5    # Output directory
 # Variable definitions
 
 # Required programs
-init_py="create_polymer.py" # Python script for generating initial
+init_py="createPolymer.py" # Python script for generating initial
                                 # chromatin/protein config
 lmp_exe="/usr/bin/lmp" # Path to LAMMPS executable
 
