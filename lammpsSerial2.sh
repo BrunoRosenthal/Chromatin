@@ -30,6 +30,10 @@ for nprots in $(seq $n_min 10 $n_max); do
     
     # Determine the generated directory name (assuming consistent naming format)
     sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/" 2>/dev/null | head -n 1)
+    
+    # Remove trailing slash from sim_dir if it exists
+    sim_dir="${sim_dir%/}"
+    
     if [[ -z "$sim_dir" ]]; then
         echo "Error: Simulation directory for nprots=$nprots was not found!"
         exit 1
@@ -39,7 +43,7 @@ for nprots in $(seq $n_min 10 $n_max); do
     for (( i=0; i<n_runs; i++ )); do
         echo "Running simulation for nprots=$nprots, run=$run"
         
-        # Build the run script path
+        # Build the run script path (no double slashes)
         run_script="${sim_dir}/run_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.sh"
         
         if [[ ! -f "$run_script" ]]; then
@@ -48,10 +52,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         fi
         
         chmod +x "$run_script"  # Ensure the script is executable
-
-        # Run the simulation synchronously and allow error messages to print to the terminal
-        echo "Running simulation script: $run_script"
-        "$run_script"  # Run the simulation and allow error messages to be printed to the terminal
+        "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
         
         # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
@@ -62,7 +63,6 @@ for nprots in $(seq $n_min 10 $n_max); do
         fi
         
         # Move trajectory file to the designated directory
-        echo "Copying trajectory file to $traj_dir"
         cp "$traj_file" "$traj_dir/"
         
         ((run++))  # Increment run number
@@ -71,3 +71,4 @@ for nprots in $(seq $n_min 10 $n_max); do
 done
 
 echo "All simulations completed. Trajectory files saved in $traj_dir."
+
