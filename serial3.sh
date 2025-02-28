@@ -21,14 +21,14 @@ for nprots in $(seq $n_min 10 $n_max); do
     runProt=1 
     echo "Generating input file for nprots=$nprots"
     
-    # Run init script for given protein count and run number 
+    # Run init script for the given protein count only once
     chmod +x lammps_init.sh  
-    ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  
+    ./lammps_init.sh $nsites $sep $nprots 1 "$traj_dir"  
 
     # Dynamically build the sim_dir based on the provided argument (traj_dir)
     sim_dir="${traj_dir}/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}"
     
-    # Loop over the number of runs
+    # Loop over the number of runs for the current protein count
     for (( i=0; i<n_runs; i++ )); do
         echo "Running simulation for nprots=$nprots, run=$run"
         
@@ -51,6 +51,6 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         ((run++))  # Increment run number
     done
-    ((runProt++))
+    ((runProt++))  # Increment the protein count run number after finishing all runs for current protein count
 done
 echo "All simulations completed. Trajectory files saved in $traj_dir."
