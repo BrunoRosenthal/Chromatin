@@ -28,11 +28,10 @@ for nprots in $(seq $n_min 10 $n_max); do
     # Call lammps_init.sh to generate input files for each configuration
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
     
-    # Search for the simulation directory inside traj_dir (e.g., testing)
-    sim_dir=$(find "$traj_dir" -type d -name "noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}")
-    
+    # Determine the generated directory name (assuming consistent naming format)
+    sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/" 2>/dev/null | head -n 1)
     if [[ -z "$sim_dir" ]]; then
-        echo "Error: Simulation directory for nprots=$nprots was not found in $traj_dir!"
+        echo "Error: Simulation directory for nprots=$nprots was not found!"
         exit 1
     fi
     
@@ -49,13 +48,10 @@ for nprots in $(seq $n_min 10 $n_max); do
         fi
         
         chmod +x "$run_script"  # Ensure the script is executable
-        
-        # Run the simulation and wait for it to finish
-        echo "Running LAMMPS simulation for nprots=$nprots, run=$run..."
-        "$run_script"  # Run the simulation and wait for it to complete
-        
-        # Print the current simulation run
-        echo "Completed simulation for nprots=$nprots, run=$run. Copying the trajectory file..."
+
+        # Run the simulation synchronously and allow error messages to print to the terminal
+        echo "Running simulation script: $run_script"
+        "$run_script"  # Run the simulation and allow error messages to be printed to the terminal
         
         # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
@@ -65,7 +61,8 @@ for nprots in $(seq $n_min 10 $n_max); do
             exit 1
         fi
         
-        # Copy the trajectory file to the designated directory
+        # Move trajectory file to the designated directory
+        echo "Copying trajectory file to $traj_dir"
         cp "$traj_file" "$traj_dir/"
         
         ((run++))  # Increment run number
