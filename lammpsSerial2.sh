@@ -1,11 +1,11 @@
 #!/bin/bash
 # lammps_batch_run.sh
 # This script automates multiple runs of LAMMPS simulations with varying protein counts
-# and saves only the trajectory files to a single directory.
+# and copies all trajectory files to a single directory in the same location as this script.
 
 # Ensure we have the required arguments
-if (( $# != 6 )); then
-    echo "Usage: lammps_batch_run.sh nsites sep n_min n_max n_runs traj_dir"
+if (( $# != 5 )); then
+    echo "Usage: lammps_batch_run.sh nsites sep n_min n_max n_runs"
     exit 1
 fi
 
@@ -14,21 +14,26 @@ sep=$2        # Linear separation between TUs (in beads)
 n_min=$3      # Minimum number of proteins (e.g., 10)
 n_max=$4      # Maximum number of proteins (e.g., 100)
 n_runs=$5     # Number of repetitions per protein count
-traj_dir=$6   # Directory to store trajectory files
 
-# Ensure trajectory directory exists
+# Get the directory where this script is located
+script_dir=$(dirname "$(realpath "$0")")
+
+# Define the trajectory storage directory in the same location as this script
+traj_dir="$script_dir/trajectories"
+
+# Ensure the trajectory directory exists
 mkdir -p "$traj_dir"
 
 # Loop over protein counts
 for nprots in $(seq $n_min 10 $n_max); do
     run=1  # Initialize run counter
-    runProt=1 # Initialise the run counter for in file
+    runProt=1 # Initialize run counter for input file naming
     echo "Generating input file for nprots=$nprots"
     
-    # Call lammps_init.sh to generate input files for each configuration
-    ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
+    # Call lammps_init.sh to generate input files
+    ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"
     
-    # Determine the generated directory name (assuming consistent naming format)
+    # Determine the generated simulation directory
     sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/ 2>/dev/null | head -n 1)
     if [[ -z "$sim_dir" ]]; then
         echo "Error: Simulation directory for nprots=$nprots was not found!"
@@ -50,20 +55,18 @@ for nprots in $(seq $n_min 10 $n_max); do
         chmod +x "$run_script"  # Ensure the script is executable
         "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
         
-        # Correctly look for the trajectory file based on the expected naming convention
-        traj_file="${sim_dir}/traj_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.dat"
-        
-        if [[ ! -f "$traj_file" ]]; then
-            echo "Error: Trajectory file $traj_file not found!"
-            exit 1
+        # Copy all trajectory files from sim_dir to traj_dir
+        traj_files=("${sim_dir}"/traj_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_*.dat)
+
+        if [[ -n "$(ls "${traj_files[@]}" 2>/dev/null)" ]]; then
+            cp "${traj_files[@]}" "$traj_dir/"
+        else
+            echo "Warning: No trajectory files found in $sim_dir"
         fi
-        
-        # Move trajectory file to the designated directory
-        mv "$traj_file" "$traj_dir/"
-        
+
         ((run++))  # Increment run number
     done
-((runProt++))
+    ((runProt++))
 done
 
-echo "All simulations completed. Trajectory files saved in $traj_dir."
+echo "All simulations completed. Trajectory files copied to $traj_dir."
