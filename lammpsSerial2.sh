@@ -50,9 +50,9 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         chmod +x "$run_script"  # Ensure the script is executable
         
-        # Run the simulation to generate the trajectory file
+        # Run the simulation and wait for it to finish
         echo "Running LAMMPS simulation for nprots=$nprots, run=$run..."
-        "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
+        "$run_script"  # Run the simulation and wait for it to complete
         
         # Print the current simulation run
         echo "Completed simulation for nprots=$nprots, run=$run. Copying the trajectory file..."
