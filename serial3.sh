@@ -28,8 +28,8 @@ for nprots in $(seq $n_min 10 $n_max); do
     # Call lammps_init.sh to generate input files for each configuration
     sim_dir="./testing/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}"  # Assuming the sim_dir format follows
     
-    # Apply chmod recursively to the sim_dir path to make sure everything has execute permission
-    chmod -R +x "$sim_dir"  # Apply to the whole path recursively
+    # Apply chmod +x to lammps_init.sh in the current directory
+    chmod +x lammps_init.sh  # Make lammps_init.sh executable
     
     # Now run the lammps_init.sh script
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
