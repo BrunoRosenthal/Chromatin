@@ -28,10 +28,11 @@ for nprots in $(seq $n_min 10 $n_max); do
     # Call lammps_init.sh to generate input files for each configuration
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
     
-    # Determine the generated directory name (assuming consistent naming format)
-    sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/ 2>/dev/null | head -n 1)
+    # Search for the simulation directory inside traj_dir (e.g., testing)
+    sim_dir=$(find "$traj_dir" -type d -name "noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}")
+    
     if [[ -z "$sim_dir" ]]; then
-        echo "Error: Simulation directory for nprots=$nprots was not found!"
+        echo "Error: Simulation directory for nprots=$nprots was not found in $traj_dir!"
         exit 1
     fi
     
@@ -50,7 +51,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         chmod +x "$run_script"  # Ensure the script is executable
         "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
         
-        # Correctly look for the trajectory file based on the new naming convention
+        # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
         
         if [[ ! -f "$traj_file" ]]; then
@@ -58,7 +59,7 @@ for nprots in $(seq $n_min 10 $n_max); do
             exit 1
         fi
         
-        # Copy trajectory file to the designated directory
+        # Copy the trajectory file to the designated directory
         cp "$traj_file" "$traj_dir/"
         
         ((run++))  # Increment run number
