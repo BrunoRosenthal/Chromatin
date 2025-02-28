@@ -30,7 +30,7 @@ for nprots in $(seq $n_min 10 $n_max); do
     
     # Loop over the number of runs
     for (( i=0; i<n_runs; i++ )); do
-        echo "Running simulation for nprots=$nprots, run=$run at address"
+        echo "Running simulation for nprots=$nprots, run=$run"
         
         # Change to the sim_dir where the simulation script is
         cd "$sim_dir"
@@ -41,7 +41,8 @@ for nprots in $(seq $n_min 10 $n_max); do
 
         # Return to the original directory after the simulation
         cd "$original_dir"
-        
+
+        echo "Copying the trajectory files to the correct folder"
         # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
         
