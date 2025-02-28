@@ -25,8 +25,8 @@ for nprots in $(seq $n_min 10 $n_max); do
     runProt=1 # Initialise the run counter for in file
     echo "Generating input file for nprots=$nprots"
     
-    # Call lammps_init.sh to generate input files for each configuration
-    sim_dir="./testing/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}"  # Assuming the sim_dir format follows
+    # Dynamically build the sim_dir based on the provided argument (traj_dir)
+    sim_dir="${traj_dir}/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}"
     
     # Apply chmod +x to lammps_init.sh in the current directory
     chmod +x lammps_init.sh  # Make lammps_init.sh executable
@@ -34,8 +34,8 @@ for nprots in $(seq $n_min 10 $n_max); do
     # Now run the lammps_init.sh script
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
     
-    # Determine the generated directory name (assuming consistent naming format)
-    sim_dir=$(ls -d noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/ 2>/dev/null | head -n 1)
+    # Ensure that the sim_dir is found correctly under the provided directory
+    sim_dir=$(ls -d ${traj_dir}/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}/ 2>/dev/null | head -n 1)
     if [[ -z "$sim_dir" ]]; then
         echo "Error: Simulation directory for nprots=$nprots was not found!"
         exit 1
