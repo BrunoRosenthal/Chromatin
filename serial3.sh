@@ -1,9 +1,5 @@
 #!/bin/bash
-# lammps_batch_run.sh
-# This script automates multiple runs of LAMMPS simulations with varying protein counts
-# and saves only the trajectory files to a single directory.
 
-# Ensure we have the required arguments
 if (( $# != 6 )); then
     echo "Usage: lammps_batch_run.sh nsites sep n_min n_max n_runs traj_dir"
     exit 1
@@ -30,7 +26,7 @@ for nprots in $(seq $n_min 10 $n_max); do
     
     # Apply chmod +x to lammps_init.sh in the current directory
     chmod +x lammps_init.sh  # Make lammps_init.sh executable
-    
+
     # Now run the lammps_init.sh script
     ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  # Pass run number immediately before traj_dir
     
@@ -47,6 +43,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         # Build the run script path
         run_script="${sim_dir}/run_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.sh"
+        echo = "attempting to run script at $run_script"
         
         if [[ ! -f "$run_script" ]]; then
             echo "Error: Run script $run_script not found!"
@@ -54,7 +51,9 @@ for nprots in $(seq $n_min 10 $n_max); do
         fi
         
         chmod +x "$run_script"  # Ensure the script is executable
-        "$run_script"  # Run the simulation and allow it to complete
+        
+        # Run the simulation and allow it to complete
+        "$run_script"
         
         # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
