@@ -49,6 +49,9 @@ for nprots in $(seq $n_min 10 $n_max); do
         fi
         
         chmod +x "$run_script"  # Ensure the script is executable
+        
+        # Run the simulation to generate the trajectory file
+        echo "Running LAMMPS simulation..."
         "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
         
         # Correctly look for the trajectory file based on the expected naming convention
