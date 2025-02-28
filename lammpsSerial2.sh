@@ -51,8 +51,11 @@ for nprots in $(seq $n_min 10 $n_max); do
         chmod +x "$run_script"  # Ensure the script is executable
         
         # Run the simulation to generate the trajectory file
-        echo "Running LAMMPS simulation..."
+        echo "Running LAMMPS simulation for nprots=$nprots, run=$run..."
         "$run_script" > /dev/null 2>&1  # Run the simulation and suppress output
+        
+        # Print the current simulation run
+        echo "Completed simulation for nprots=$nprots, run=$run. Copying the trajectory file..."
         
         # Correctly look for the trajectory file based on the expected naming convention
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
