@@ -19,26 +19,22 @@ traj_dir=$6   # Directory to store trajectory files
 # Ensure trajectory directory exists
 mkdir -p "$traj_dir"
 
-# Loop over protein counts
+# Loop over protein counts and runs
 for nprots in $(seq $n_min 10 $n_max); do
-    run=1  # Initialize run counter
-    runProt=1 # Initialise the run counter for in file
-    echo "Generating input file for nprots=$nprots"
-    
-    # Call lammps_init.sh to generate input files for each configuration
-    ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  
-    
-    # Determine the generated directory name
-    sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${runProt}" 2>/dev/null | head -n 1)
-    
-    if [[ -z "$sim_dir" ]]; then
-        echo "Error: Simulation directory for nprots=$nprots was not found!"
-        exit 1
-    fi
-    
-    # Loop over the number of runs
-    for (( i=0; i<n_runs; i++ )); do
-        echo "Running simulation for nprots=$nprots, run=$run"
+    for (( run=1; run<=n_runs; run++ )); do
+        echo "Generating input file for nprots=$nprots, run=$run"
+        
+        # Ensure lammps_init.sh is executable before running it
+        chmod +x lammps_init.sh
+        ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  
+
+        # Determine the simulation directory
+        sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}" 2>/dev/null | head -n 1)
+
+        if [[ -z "$sim_dir" ]]; then
+            echo "Error: Simulation directory for nprots=$nprots, run=$run was not found!"
+            exit 1
+        fi
         
         # Build the run script path
         run_script="${sim_dir}/run_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.sh"
@@ -48,13 +44,13 @@ for nprots in $(seq $n_min 10 $n_max); do
             exit 1
         fi
         
-        chmod +x "$run_script"  # Ensure the script is executable
+        chmod +x "$run_script"  # Ensure the run script is executable
         echo "Running $run_script"
         "$run_script"  # Run the simulation
         
-        # Modify the trajectory file name to avoid clashes
+        # Trajectory file path
         traj_file="${sim_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
-        new_traj_file="${traj_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}_iter_${i}.lammpstrj"
+        new_traj_file="${traj_dir}/pos-equil_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.lammpstrj"
 
         # Efficiently wait for the trajectory file to be created
         if command -v inotifywait &> /dev/null; then
@@ -67,14 +63,11 @@ for nprots in $(seq $n_min 10 $n_max); do
             done
         fi
 
-        # Copy trajectory file with a new name to avoid clashes
+        # Copy trajectory file to avoid overwriting
         cp "$traj_file" "$new_traj_file"
         
         echo "Copied trajectory file to $new_traj_file"
-        
-        ((run++))  # Increment run number
     done
-    ((runProt++))
 done
 
 echo "All simulations completed. Trajectory files saved in $traj_dir."
