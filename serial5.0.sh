@@ -21,7 +21,7 @@ for nprots in $(seq $n_min 10 $n_max); do
         
         # Ensure lammps_init.sh is executable before running it
         chmod +x lammps_init.sh
-        ./lammps_init.sh $nsites $sep $nprots $run "$traj_dir"  
+        ./lammps_init.sh $nsites $sep $nprots $run "$out_dir"  
 
 
         sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}" 2>/dev/null | head -n 1)
