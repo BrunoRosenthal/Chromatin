@@ -33,7 +33,7 @@ for nprots in $(seq $n_min 10 $n_max); do
             exit 1  # Exit the script with an error status
         fi
 
-        cd "sim_dir"
+        cd "$sim_dir"
 
         echo "Running the simulation for nprots=$nprots, run=$run"
         
