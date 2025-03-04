@@ -24,12 +24,12 @@ for nprots in $(seq $n_min 10 $n_max); do
         ./lammps_init.sh $nsites $sep $nprots $run "$out_dir"  
 
 
-        sim_dir=$(ls -d "$traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}" 2>/dev/null | head -n 1)
+        sim_dir=$(ls -d "$out_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}" 2>/dev/null | head -n 1)
 
         # Check if the directory was found
         if [[ -z "$sim_dir" ]]; then
             echo "Error: Expected directory does not exist:"
-            echo "  $traj_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}"
+            echo "  $out_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}"
             exit 1  # Exit the script with an error status
         fi
 
@@ -54,6 +54,6 @@ for nprots in $(seq $n_min 10 $n_max); do
     done
 done
 
-echo "All simulations completed. Trajectory files saved in $traj_dir."
+echo "All simulations completed. Trajectory files saved in $out_dir."
 
         
