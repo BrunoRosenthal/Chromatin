@@ -12,38 +12,42 @@ out_dir=$6   # Directory to store trajectory files
 
 original_dir=$(pwd)
 
-
-#looping over protein counts
+# Looping over protein counts
 for nprots in $(seq $n_min 10 $n_max); do
-    #looping for multiple runs at protein count
+    # Looping for multiple runs at protein count
     for (( run=1; run<=n_runs; run++ )); do
         echo "Generating input file for nprots=$nprots, run=$run"
         
         # Ensure lammps_init.sh is executable before running it
         chmod +x lammps_init.sh
-        ./lammps_init.sh $nsites $sep $nprots $run "$out_dir"  
+        ./lammps_init.sh $nsites $sep $nprots $run "$out_dir"
 
+        # Define expected simulation directory
+        sim_dir="$out_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}"
+        echo "Checking for directory: $sim_dir"
 
-        sim_dir=$(ls -d "$out_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}" 2>/dev/null | head -n 1)
-
-        # Check if the directory was found
-        if [[ -z "$sim_dir" ]]; then
+        # Check if the directory exists
+        if [[ ! -d "$sim_dir" ]]; then
             echo "Error: Expected directory does not exist:"
-            echo "  $out_dir/noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}"
-            exit 1  # Exit the script with an error status
+            echo "  $sim_dir"
+            continue  # Skip this run instead of exiting
         fi
 
-        cd "$sim_dir"
+        if ! cd "$sim_dir"; then
+            echo "Error: Could not enter directory '$sim_dir'"
+            continue
+        fi
 
         echo "Running the simulation for nprots=$nprots, run=$run"
-        
+
         # Define the script filename
         script_name="run_noise_Ns_${nsites}_l_${sep}_Np_${nprots}_run_${run}.sh"
 
         # Ensure the script exists before making it executable
         if [[ ! -f "$script_name" ]]; then
             echo "Error: Script '$script_name' does not exist."
-            exit 1
+            cd "$original_dir"
+            continue
         fi
 
         chmod +x "$script_name"
@@ -55,5 +59,3 @@ for nprots in $(seq $n_min 10 $n_max); do
 done
 
 echo "All simulations completed. Trajectory files saved in $out_dir."
-
-        
