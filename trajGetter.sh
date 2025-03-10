@@ -44,8 +44,8 @@ for nprots in $(seq $n_min 10 $n_max); do
 
         # Check if the file exists before copying
         if [[ -f "$script_name" ]]; then
-            cp "$script_name" "$target_dir/"
-            echo "Copied $script_name to $target_dir/"
+            cp "$script_name" "${original_dir}/${target_dir}/"
+            echo "Copied $script_name to ${original_dir}/${target_dir}/"
         else
             echo "Warning: File not found: $script_name"
         fi
