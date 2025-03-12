@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 def plot_run_analysis(on_off_dir, np_value, run_value, output_dir):
-    """Generates a histogram of Phi values and a heatmap for a specific run."""
-    
-    # Construct the file path
+    #makes histogram of phis for a given run
+
     file_name = f"TF_on_off_Matrix_Np_{np_value}_run_{run_value}.json"
     file_path = os.path.join(on_off_dir, file_name)
     
@@ -20,17 +19,17 @@ def plot_run_analysis(on_off_dir, np_value, run_value, output_dir):
     with open(file_path, 'r') as f:
         on_off_matrix = json.load(f)
     
-    # Convert to DataFrame
+    #use df to simplify process
     df = pd.DataFrame.from_dict(on_off_matrix, orient='index')
     df = df.sort_index()
     
-    # Compute Phi values (fraction of time bound)
+    #Compute Phis
     phi_values = df.mean(axis=1)
     
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
-    # Plot Histogram of Phi values
+    #Plot Histogram of Phi values
     plt.figure(figsize=(8, 6))
     sns.histplot(phi_values, bins=20, kde=True, color='blue', edgecolor='black')
     plt.xlabel("Phi (Activity)")
@@ -54,8 +53,8 @@ def plot_run_analysis(on_off_dir, np_value, run_value, output_dir):
     plt.show()
 
 if __name__ == "__main__":
-    on_off_dir = "TF_On_Off_Matrices"  # Directory containing on/off matrices
-    output_dir = os.path.dirname(os.path.abspath(__file__))  # Save in the same directory as the script
-    np_value = int(input("Enter Np value: "))  # User input for Np
-    run_value = int(input("Enter run number: "))  # User input for run number
+    on_off_dir = "TF_On_Off_Matrices"  
+    output_dir = os.path.dirname(os.path.abspath(__file__))  
+    np_value = int(input("Enter Np value: "))  
+    run_value = int(input("Enter run number: ")) 
     plot_run_analysis(on_off_dir, np_value, run_value, output_dir)
