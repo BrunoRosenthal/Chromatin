@@ -75,7 +75,7 @@ def main():
     for l_val, n_repeats in LENGTH_REPEAT_MAP.items():
         base = Path(f"./runSep{l_val}")
         if not base.exists():
-            print(f"⚠️ Directory not found: runSep{l_val}")
+            print(f" Directory not found: runSep{l_val}")
             continue
 
         results = []
